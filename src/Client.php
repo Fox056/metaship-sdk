@@ -473,4 +473,15 @@ class Client implements LoggerAwareInterface
     {
         return $this->callApi('GET', "/v2/parcels/$parcel_id/acceptance");
     }
+
+    public function createDelivery($shop_id, $order_ids)
+    {
+        return $this->callApi('POST', "/v2/customer/shops/$shop_id/delivery_services", ['orderIds' => $order_ids]);
+    }
+
+    public function getDelivery($shop_id)
+    {
+        return $this->callApi('GET', "/v2/customer/shops/$shop_id/delivery_services");
+    }
+
 }
