@@ -40,7 +40,7 @@ class Client implements LoggerAwareInterface
     const API_URI_TEST = 'https://dev.api.metaship.ru';
     const API_URI_PROD = 'https://api.metaship.ru';
 
-    const DATA_JSON   = 'json';
+    const DATA_JSON = 'json';
     const DATA_PARAMS = 'form_params';
 
     /**
@@ -61,7 +61,7 @@ class Client implements LoggerAwareInterface
         $this->stack->push($this->handleAuthorizationHeader());
 
         $this->httpClient = new \GuzzleHttp\Client([
-            'handler'  => $this->stack,
+            'handler' => $this->stack,
             'base_uri' => $api_uri,
             'timeout' => $timeout,
             'exceptions' => false,
@@ -121,7 +121,7 @@ class Client implements LoggerAwareInterface
         if (preg_match('~^application/(pdf|zip|octet-stream)~', $content_type, $matches_type)) {
             $is_file = true;
             if ($this->logger) {
-                $this->logger->info("MetaShip API response {$method}: получен файл с расширением ".$matches_type[1], $headers);
+                $this->logger->info("MetaShip API response {$method}: получен файл с расширением " . $matches_type[1], $headers);
             }
         } else {
             if ($this->logger) {
@@ -165,10 +165,8 @@ class Client implements LoggerAwareInterface
      */
     private function handleAuthorizationHeader()
     {
-        return function ($handler)
-        {
-            return function (RequestInterface $request, array $options) use ($handler)
-            {
+        return function ($handler) {
+            return function (RequestInterface $request, array $options) use ($handler) {
                 if ($this->jwt) {
                     $request = $request->withHeader('Authorization', 'Bearer ' . $this->jwt);
                 }
@@ -186,9 +184,7 @@ class Client implements LoggerAwareInterface
         if ($this->jwt) {
             try {
                 Jwt::decode($this->jwt);
-            }
-
-            catch (TokenException $e) {
+            } catch (TokenException $e) {
                 $this->jwt = $this->generateJwt();
             }
         } else {
@@ -263,7 +259,7 @@ class Client implements LoggerAwareInterface
      */
     public function getWarehouse($warehouse_id)
     {
-        return $this->callApi('GET', '/v2/customer/warehouses/'.$warehouse_id);
+        return $this->callApi('GET', '/v2/customer/warehouses/' . $warehouse_id);
     }
 
     /**
@@ -275,7 +271,7 @@ class Client implements LoggerAwareInterface
      */
     public function deleteWarehouse($warehouse_id)
     {
-        return $this->callApi('DELETE', '/v2/customer/warehouses/'.$warehouse_id);
+        return $this->callApi('DELETE', '/v2/customer/warehouses/' . $warehouse_id);
     }
 
     /**
@@ -326,7 +322,7 @@ class Client implements LoggerAwareInterface
         if (empty($delivery_code) && empty($city_name))
             throw new \InvalidArgumentException('Вы должны указать код СД или название города');
 
-        return $this->callApi('GET', '/v2/customer/info/delivery_service_points', ['deliveryServiceCode' => $delivery_code, 'cityRaw' => $city_name, 'shopId'=> $shop_id]);
+        return $this->callApi('GET', '/v2/customer/info/delivery_service_points', ['deliveryServiceCode' => $delivery_code, 'cityRaw' => $city_name, 'shopId' => $shop_id]);
     }
 
     /**
@@ -434,7 +430,7 @@ class Client implements LoggerAwareInterface
      */
     public function getParcelInfo($parcel_id)
     {
-        return $this->callApi('GET', "/v2/parcels/".$parcel_id);
+        return $this->callApi('GET', "/v2/parcels/" . $parcel_id);
     }
 
     /**
@@ -474,9 +470,45 @@ class Client implements LoggerAwareInterface
         return $this->callApi('GET', "/v2/parcels/$parcel_id/acceptance");
     }
 
-    public function createDelivery($shop_id, $order_ids)
+    public function createDelivery($request)
     {
-        return $this->callApi('POST', "/v2/customer/shops/$shop_id/delivery_services", ['orderIds' => $order_ids]);
+        $shop_id = $request['shop_id'];
+        $params = ['deliveryServiceCode' => $request['deliveryServiceCode']];
+
+        //Почта россии
+        if ($request['token']) $params['data']['token'] = $request['token'];
+        if ($request['secret']) $params['data']['secret'] = $request['secret'];
+        if ($request['intakePostOfficeCode']) $params['data']['intakePostOfficeCode'] = $request['intakePostOfficeCode'];
+
+        //СДЭК
+        if ($request['account']) $params['data']['account'] = $request['account'];
+        if ($request['password']) $params['data']['password'] = $request['password'];
+        if ($request['shipmentPointCode']) $params['data']['shipmentPointCode'] = $request['shipmentPointCode'];
+
+        //Boxberry
+        if ($request['token']) $params['data']['token'] = $request['token'];
+        if ($request['intakeDeliveryPointCode']) $params['data']['intakeDeliveryPointCode'] = $request['intakeDeliveryPointCode'];
+
+        //5 post
+        if ($request['apiKey']) $params['data']['apiKey'] = $request['apiKey'];
+        if ($request['partnerNumber']) $params['data']['partnerNumber'] = $request['partnerNumber'];
+        if ($request['baseWeight']) $params['data']['baseWeight'] = $request['baseWeight'];
+
+        //Яндекс Доставка
+        if ($request['token']) $params['data']['token'] = $request['token'];
+        if ($request['intakePointCode']) $params['data']['intakePointCode'] = $request['intakePointCode'];
+
+        //DPD
+        if ($request['clientNumber']) $params['data']['clientNumber'] = $request['clientNumber'];
+        if ($request['clientKey']) $params['data']['clientKey'] = $request['clientKey'];
+        if ($request['intakePointCode']) $params['data']['intakePointCode'] = $request['intakePointCode'];
+
+        //ПЭК
+        if ($request['login']) $params['data']['login'] = $request['login'];
+        if ($request['apiKey']) $params['data']['apiKey'] = $request['apiKey'];
+        if ($request['senderWarehouseId']) $params['data']['senderWarehouseId'] = $request['senderWarehouseId'];
+
+        return $this->callApi('POST', "/v2/customer/shops/$shop_id/delivery_services", $params);
     }
 
     public function getDelivery($shop_id)
