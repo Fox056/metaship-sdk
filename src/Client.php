@@ -472,7 +472,7 @@ class Client implements LoggerAwareInterface
 
     public function createDelivery($request)
     {
-        $shop_id = $request['shop_id'];
+        $shop_id = $request->shop_id;
         $params = ['deliveryServiceCode' => $request['deliveryServiceCode']];
 
         //Почта россии
@@ -507,6 +507,8 @@ class Client implements LoggerAwareInterface
         if ($request['login']) $params['data']['login'] = $request['login'];
         if ($request['apiKey']) $params['data']['apiKey'] = $request['apiKey'];
         if ($request['senderWarehouseId']) $params['data']['senderWarehouseId'] = $request['senderWarehouseId'];
+
+        if ($request['type']) $params['data']['type'] = $request['type'];
 
         return $this->callApi('POST', "/v2/customer/shops/$shop_id/delivery_services", $params);
     }
