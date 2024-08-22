@@ -503,10 +503,9 @@ class Client implements LoggerAwareInterface
         if ($request['clientKey']) $params['data']['clientKey'] = $request['clientKey'];
         if ($request['intakePointCode']) $params['data']['intakePointCode'] = $request['intakePointCode'];
 
-        //ПЭК
-        if ($request['login']) $params['data']['login'] = $request['login'];
-        if ($request['apiKey']) $params['data']['apiKey'] = $request['apiKey'];
-        if ($request['senderWarehouseId']) $params['data']['senderWarehouseId'] = $request['senderWarehouseId'];
+        //Dalli
+        if ($request['token']) $params['data']['token'] = $request['token'];
+        if ($request['region']) $params['data']['region'] = $request['region'];
 
         $params['data']['type'] = 'integration';
 
