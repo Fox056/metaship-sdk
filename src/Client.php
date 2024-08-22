@@ -508,7 +508,7 @@ class Client implements LoggerAwareInterface
         if ($request['apiKey']) $params['data']['apiKey'] = $request['apiKey'];
         if ($request['senderWarehouseId']) $params['data']['senderWarehouseId'] = $request['senderWarehouseId'];
 
-        if ($request['type']) $params['data']['type'] = $request['type'];
+        $params['data']['type'] = 'integration';
 
         return $this->callApi('POST', "/v2/customer/shops/$shop_id/delivery_services", $params);
     }
